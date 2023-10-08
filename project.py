@@ -6,13 +6,13 @@ class Relation:
     def __str__(self):
         return str(self.columns) + "\n" + "\n".join(map(str, self.data))
 
-# 准备一个函数来读取并解析数据文件
+# Get a function to input file
 def parse_data_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
         data_str = file.read()
 
-    data_blocks = data_str.strip().split('{{')  # 使用双大括号作为数据块之间的分隔符
-    relations = {}  # 用于存储关系的字典
+    data_blocks = data_str.strip().split('{{')  
+    relations = {}  # empty data space
     operator = None
 
     for data_block in data_blocks:
@@ -45,19 +45,19 @@ def parse_data_file(file_path):
     operator=lines[lines.__len__()-1]
     return relations,operator
 
-# 示例：从文件中读取数据
-file_path = 'data.txt'  # 替换为你的数据文件路径
+# The file that we wants to input the data
+file_path = 'data.txt'  # You can change to your own file
 
-# 解析数据文件
+# get tje data from file
 relations,operator = parse_data_file(file_path)
 
 
 def selection_by_condition(relation, operator, value,col):
-    # 获取关系中的列索引
+    # get the columns and data for searching
     columns = relation.columns
     data = relation.data
 
-    # 初始化筛选结果
+    # create a empty list
     selected_data = []
     count1=0
     for i in columns:
@@ -65,7 +65,7 @@ def selection_by_condition(relation, operator, value,col):
             
             break
         count1=count1+1
-    # 遍历关系中的每个元组
+    # go through the rows to find the right one
     for row in data:
         count2=0
         for element in row:
@@ -84,62 +84,62 @@ def selection_by_condition(relation, operator, value,col):
                 selected_data.append(row)
             count2=count2+1
 
-    # 创建新的关系对象来存储筛选结果
+    # create a new relation to return
     selected_relation = Relation(columns, selected_data)
 
     return selected_relation
 
 def projection(relation, column_names):
-    # 获取关系中的列索引
+    # get the columns and data for searching
     columns = relation.columns
     data = relation.data
 
-    # 初始化投影结果
+    # create a empty list
     projected_data = []
 
-    # 获取列索引列表
+    # get the index for searching
     column_indices = [columns.index(l) for l in column_names]
 
-    # 遍历关系中的每个元组，只保留指定的列
+    # go through
     for row in data:
         projected_row = [row[i] for i in column_indices]
         projected_data.append(projected_row)
 
-    # 创建新的关系对象来存储投影结果
+    # create a new relation to store the result
     projected_columns = column_names
     projected_relation = Relation(projected_columns, projected_data)
 
     return projected_relation
 
 def join(relation1, relation2, condition):
-    # 获取关系1和关系2的列索引
+    # get the columns and data for searching
     columns1 = relation1.columns
     columns2 = relation2.columns
     data1 = relation1.data
     data2 = relation2.data
 
-    # 初始化连接结果
+    # create a empty list
     joined_data = []
 
-    # 获取连接条件中的列索引
+    # get the key for both table
     condition_columns = [col.strip() for col in condition.split('=')]
     left_column = condition_columns[0]
     right_column = condition_columns[1]
 
-    # 获取左关系和右关系中的连接列索引
+    # get the index for both table with the corresponding column
     left_index = columns1.index(left_column)
     right_index = columns2.index(right_column)
 
-    # 遍历左关系的每个元组
+    # loop over every element in data1
     for row1 in data1:
-        # 遍历右关系的每个元组
+        # loop over every elements in data2
         for row2 in data2:
-            # 如果连接条件匹配，将两个元组合并成一个新元组
+            # if match, create a new row
             if row1[left_index] == row2[right_index]:
                 joined_row = row1 + row2
                 joined_data.append(joined_row)
 
-    # 创建新的关系对象来存储连接结果
+    # connect two tables
     joined_columns = columns1 + columns2
     joined_relation = Relation(joined_columns, joined_data)
 
@@ -148,93 +148,93 @@ def join(relation1, relation2, condition):
 
 
 
-# 交集操作：返回两个关系的交集结果
+# return the intersection
 def intersection(relation1, relation2):
-    # 获取关系1和关系2的列索引
+    # get the columns and data for both tables
     columns1 = relation1.columns
     columns2 = relation2.columns
     data1 = relation1.data
     data2 = relation2.data
 
-    # 检查列是否匹配
+    # check if them are match 
     if columns1 != columns2:
         raise ValueError("Columns do not match for intersection operation")
 
-    # 初始化交集结果
+    # create a empty list
     intersection_data = []
 
-    # 遍历关系1的每个元组
+    # go through every elements in data1
     for row1 in data1:
-        # 遍历关系2的每个元组，检查是否有匹配的元组
+     # go through every elements in data2
         for row2 in data2:
             if row1 == row2:
                 intersection_data.append(row1)
                 break
 
-    # 创建新的关系对象来存储交集结果
+    # create a new relation for result
     intersection_relation = Relation(columns1, intersection_data)
 
     return intersection_relation
 
-# 并集操作：将两个关系合并为一个新的关系
+# combine to one relation: Union
 def union(relation1, relation2):
-    # 获取关系1和关系2的列索引
+    # get the columns and data for both tables
     columns1 = relation1.columns
     columns2 = relation2.columns
     data1 = relation1.data
     data2 = relation2.data
 
-    # 检查列是否匹配
+    # check if the columns are fit
     if columns1 != columns2:
         raise ValueError("Columns do not match for union operation")
 
-    # 合并关系数据
+    # combine to one relation
     union_data = data1 + data2
 
-    # 创建新的关系对象来存储并集结果
+    # create a new relation for the result
     union_relation = Relation(columns1, union_data)
 
     return union_relation
 
 def minus(relation1, relation2):
-    # 获取关系1和关系2的列索引
+    # get the columns and data for both tables
     columns1 = relation1.columns
     columns2 = relation2.columns
     data1 = relation1.data
     data2 = relation2.data
 
-    # 检查列是否匹配
+    # check if the columns are fit
     if columns1 != columns2:
         raise ValueError("Columns do not match for minus operation")
 
-    # 初始化差集结果
+    # get a empty list
     minus_data = []
 
-    # 遍历关系1的每个元组
+    # go through every elements in data1
     for row1 in data1:
-        # 标志是否在关系2中找到匹配的元组
+        # go through every elements in data2
         found_match = False
 
-        # 遍历关系2的每个元组，检查是否有匹配的元组
+        # go through every elements in data2 to find if anything matches
         for row2 in data2:
             if row1 == row2:
                 found_match = True
                 break
 
-        # 如果没有找到匹配的元组，将关系1的元组添加到差集结果中
+        # if nothing matches, update to the result
         if not found_match:
             minus_data.append(row1)
 
-    # 创建新的关系对象来存储差集结果
+    # create a new relation for the result
     minus_relation = Relation(columns1, minus_data)
 
     return minus_relation
-# 显示结果
+# show the database
 for relation_name, relation in relations.items():
     print(f"{relation_name} Relation:")
     print(relation)
 
-print(operator.split())
+
 
 
 def main(re,op):
@@ -254,10 +254,10 @@ def main(re,op):
                 con=operatorL[1][count+1:] 
                 break
             count=count+1
-        print(table,sign,con,col)
+  
         for relation_name, rela in relations.items():
             if relation_name == table:
-                print(rela)
+               
                 result=selection_by_condition(rela,sign,con,col)
                 print("selection:")
                 print(result)
@@ -266,7 +266,7 @@ def main(re,op):
         col=operatorL[1].replace(' ','').split(',')
         table=operatorL[2].strip("()")
         
-        print(col,table)
+  
         for relation_name, rela in relations.items():
             if relation_name == table:
                 
@@ -274,6 +274,7 @@ def main(re,op):
                 print("projection:")
                 print(result)
                 break
+            
     if(operatorL[1]=="⨝" or operatorL[1].lower()=="join"):
         table1=operatorL[0].strip("()")
         table2=operatorL[3].strip("()")
@@ -300,11 +301,11 @@ def main(re,op):
         for relation_name, rela in relations.items():
             if relation_name == table1:
                 rela1=rela
-                print(rela1)
+             
 
             elif relation_name==table2:
                 rela2=rela
-                print(rela2)
+              
         result=union(rela1, rela2)
         print("Union Relation:")
         print(result)
@@ -320,11 +321,11 @@ def main(re,op):
         for relation_name, rela in relations.items():
             if relation_name == table1:
                 rela1=rela
-                print(rela1)
+           
 
             elif relation_name==table2:
                 rela2=rela
-                print(rela2)
+
         result=intersection(rela1, rela2)
         print("Intersection Relation:")
         print(result)
@@ -338,11 +339,11 @@ def main(re,op):
         for relation_name, rela in relations.items():
             if relation_name == table1:
                 rela1=rela
-                print(rela1)
+            
 
             elif relation_name==table2:
                 rela2=rela
-                print(rela2)
+            
         result=minus(rela1, rela2)
         print("Minus Relation:")
         print(result)
